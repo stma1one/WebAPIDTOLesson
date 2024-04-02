@@ -12,62 +12,78 @@ namespace CalculatorWebAPI.Controllers
         
         // POST api/solve
         [HttpPost("solve")]
-        public ExerciseResultDto Solve([FromBody] ExerciseDto exercise)
+        public IActionResult Solve([FromBody] ExerciseDto exercise)
         {
-            //Get DTO class and change it to Model class
-            Exercise e = new Exercise
+            try
             {
-                FirstVal = exercise.FirstVal,
-                SecondVal = exercise.SecondVal,
-                Op = exercise.Op
-            };
+                //Get DTO class and change it to Model class
+                Exercise e = new Exercise
+                {
+                    FirstVal = exercise.FirstVal,
+                    SecondVal = exercise.SecondVal,
+                    Op = exercise.Op
+                };
+                
+                //Call model operation
+                ExerciseResult res = e.Solve();
 
-            //Call model operation
-            ExerciseResult res = e.Solve();
+                //Change back the result to a DTO class
+                ExerciseResultDto ret = new ExerciseResultDto
+                {
+                    Exercise = exercise,
+                    Success = res.Success,
+                    Result = res.Result
+                };
 
-            //Change back the result to a DTO class
-            ExerciseResultDto ret = new ExerciseResultDto
+                return Ok(ret);
+            }
+            catch (Exception ex)
             {
-                Exercise = exercise,
-                Success = res.Success,
-                Result = res.Result
-            };
-
-            return ret;
+                return BadRequest(ex.Message);
+            }
+            
         }
 
         // Get /api/solve?first=20&op=%2B&second=9
         //%2B stands for +
         //in other operations just put the character (because + is special character
         [HttpGet("solve")]
-        public ExerciseResultDto Solve([FromQuery] int first, [FromQuery] char op, [FromQuery] int second)
+        public IActionResult Solve([FromQuery] int first, [FromQuery] char op, [FromQuery] int second)
         {
-            //Build the model exercise class
-            Exercise e = new Exercise
+            try
             {
-                FirstVal = first,
-                SecondVal = second,
-                Op = op
-            };
+                //Build the model exercise class
+                Exercise e = new Exercise
+                {
+                    FirstVal = first,
+                    SecondVal = second,
+                    Op = op
+                };
 
-            //Call model operation
-            ExerciseResult res = e.Solve();
+                //Call model operation
+                ExerciseResult res = e.Solve();
 
-            //Change back the result to a DTO class
-            ExerciseDto exercise = new ExerciseDto
+                //Change back the result to a DTO class
+                ExerciseDto exercise = new ExerciseDto
+                {
+                    FirstVal = e.FirstVal,
+                    SecondVal = e.SecondVal,
+                    Op = e.Op
+                };
+                ExerciseResultDto ret = new ExerciseResultDto
+                {
+                    Exercise = exercise,
+                    Success = res.Success,
+                    Result = res.Result
+                };
+
+                return Ok(ret);
+            }
+            catch (Exception ex)
             {
-                FirstVal = e.FirstVal,
-                SecondVal = e.SecondVal,
-                Op = e.Op
-            };
-            ExerciseResultDto ret = new ExerciseResultDto
-            {
-                Exercise = exercise,
-                Success = res.Success,
-                Result = res.Result
-            };
-
-            return ret;
+                return BadRequest(ex.Message);
+            }
+            
         }
 
     }
